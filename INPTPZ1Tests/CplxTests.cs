@@ -15,22 +15,22 @@ namespace INPTPZ1.Mathematics.Tests
         [TestMethod()]
         public void AddTest()
         {
-            Cplx a = new Cplx()
+            ComplexNumber a = new ComplexNumber()
             {
-                Re = 10,
-                Imaginari = 20
+                Real = 10,
+                Imaginary = 20
             };
-            Cplx b = new Cplx()
+            ComplexNumber b = new ComplexNumber()
             {
-                Re = 1,
-                Imaginari = 2
+                Real = 1,
+                Imaginary = 2
             };
 
-            Cplx actual = a.Add(b);
-            Cplx shouldBe = new Cplx()
+            ComplexNumber actual = a.Add(b);
+            ComplexNumber shouldBe = new ComplexNumber()
             {
-                Re = 11,
-                Imaginari = 22
+                Real = 11,
+                Imaginary = 22
             };
 
             Assert.AreEqual(shouldBe, actual);
