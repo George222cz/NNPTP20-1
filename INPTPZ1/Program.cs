@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using INPTPZ1.Mathematics;
 
 namespace INPTPZ1
 {
@@ -26,7 +27,6 @@ namespace INPTPZ1
             double ystep = (ymax - ymin) / bitmapHeight;
 
             List<ComplexNumber> roots = new List<ComplexNumber>();
-            // TODO: poly should be parameterised?
             Poly poly = new Poly();
             poly.Coefficients.Add(new ComplexNumber() { Real = 1 });
             poly.Coefficients.Add(ComplexNumber.Zero);
@@ -37,37 +37,34 @@ namespace INPTPZ1
             Console.WriteLine(poly);
             Console.WriteLine(derivatedPoly);
 
-            var colors = new Color[]
+            Color[] colors = new Color[]
             {
                 Color.Red, Color.Blue, Color.Green, Color.Yellow, Color.Orange, Color.Fuchsia, Color.Gold, Color.Cyan, Color.Magenta
             };
 
             // for every pixel in image...
-            for (int i = 0; i < bitmapWidth; i++)
+            for (int x = 0; x < bitmapWidth; x++)
             {
-                for (int j = 0; j < bitmapHeight; j++)
+                for (int y = 0; y < bitmapHeight; y++)
                 {
-                    ComplexNumber location = new ComplexNumber().Initialize(xmin,xmin,xstep,ystep,i,j);                    
+                    ComplexNumber location = new ComplexNumber().Initialize(xmin,xmin,xstep,ystep,x,y);                    
                     int iterationPassed = CalculateRootUsingNewtonMethod(poly, derivatedPoly, ref location);
                     int rootIndex = FindRootIndex(roots, location);
-                    ColorizePixel(bitmap,colors,i,j,iterationPassed,rootIndex);
+                    ColorizePixel(bitmap,colors,x,y,iterationPassed,rootIndex);
                 }
             }
-
             bitmap.Save(output ?? "../../../out.png");
-            //Console.ReadKey();
         }
 
+        // find solution of equation using newton's iteration
         private static int CalculateRootUsingNewtonMethod(Poly poly, Poly derivatedPoly, ref ComplexNumber location)
         {
-            // find solution of equation using newton's iteration
             int iterationsPassed = 0;
             for (int i = 0; i < MAX_ITERATIONS; i++)
             {
                 ComplexNumber difference = poly.Evaluate(location).Divide(derivatedPoly.Evaluate(location));
                 location = location.Subtract(difference);
 
-                //Console.WriteLine($"{q} {ox} -({diff})");
                 if (Math.Pow(difference.Real, 2) + Math.Pow(difference.Imaginary, 2) >= 0.5)
                 {
                     i--;
@@ -77,10 +74,10 @@ namespace INPTPZ1
             return iterationsPassed;
         }
 
+        // find solution root number
         private static int FindRootIndex(List<ComplexNumber> roots, ComplexNumber location)
         {
-            // find solution root number
-            var known = false;
+            bool known = false;
             int index = 0;
             for (int i = 0; i < roots.Count; i++)
             {
@@ -98,15 +95,15 @@ namespace INPTPZ1
             return index;
         }
 
-        private static void ColorizePixel(Bitmap bitmap, Color[] colors, int i, int j, int iteration, int rootIndex)
+        // colorize pixel according to root number
+        private static void ColorizePixel(Bitmap bitmap, Color[] colors, int x, int y, int iteration, int rootIndex)
         {
-            // colorize pixel according to root number
-            var color = colors[rootIndex % colors.Length];
+            Color color = colors[rootIndex % colors.Length];
             color = Color.FromArgb(
                 Math.Min(Math.Max(0, color.R - (int)iteration * 2), 255), 
                 Math.Min(Math.Max(0, color.G - (int)iteration * 2), 255), 
                 Math.Min(Math.Max(0, color.B - (int)iteration * 2), 255));
-            bitmap.SetPixel(j, i, color);
+            bitmap.SetPixel(x, y, color);
         }
     }
 }
