@@ -4,16 +4,16 @@ namespace INPTPZ1
 {
     namespace Mathematics
     {
-        public class Poly
+        public class Polynomial
         {
 
             public List<ComplexNumber> Coefficients { get; set; }
 
-            public Poly() => Coefficients = new List<ComplexNumber>();
+            public Polynomial() => Coefficients = new List<ComplexNumber>();
 
-            public Poly Derive()
+            public Polynomial Derive()
             {
-                Poly poly = new Poly();
+                Polynomial poly = new Polynomial();
                 for (int i = 1; i < Coefficients.Count; i++)
                 {
                     poly.Coefficients.Add(Coefficients[i].Multiply(new ComplexNumber() { Real = i }));

@@ -12,52 +12,68 @@ namespace INPTPZ1
     class Program
     {
         private const int MAX_ITERATIONS = 30;
+        private const double DEVIATION = 0.0001;
+        private const string DEFAULT_OUTPUT = "../../../out.png";
+
+        private static int bitmapWidth, bitmapHeight;
+        private static double xmin, xmax, ymin, ymax, xstep, ystep;
+        private static string output;
+        private static Bitmap bitmap;
+
         static void Main(string[] args)
         {
-            int bitmapWidth = int.Parse(args[0]);
-            int bitmapHeight = int.Parse(args[1]);
-            double xmin = double.Parse(args[2]);
-            double xmax = double.Parse(args[3]);
-            double ymin = double.Parse(args[4]);
-            double ymax = double.Parse(args[5]);
-            string output = args[6];
-
-            Bitmap bitmap = new Bitmap(bitmapWidth, bitmapHeight);
-            double xstep = (xmax - xmin) / bitmapWidth;
-            double ystep = (ymax - ymin) / bitmapHeight;
+            SetVariables(args);
 
             List<ComplexNumber> roots = new List<ComplexNumber>();
-            Poly poly = new Poly();
-            poly.Coefficients.Add(new ComplexNumber() { Real = 1 });
-            poly.Coefficients.Add(ComplexNumber.Zero);
-            poly.Coefficients.Add(ComplexNumber.Zero);
-            poly.Coefficients.Add(new ComplexNumber() { Real = 1 });
-            Poly derivatedPoly = poly.Derive();
+            Polynomial polynomial = new Polynomial();
+            polynomial.Coefficients.Add(new ComplexNumber() { Real = 1 });
+            polynomial.Coefficients.Add(ComplexNumber.Zero);
+            polynomial.Coefficients.Add(ComplexNumber.Zero);
+            polynomial.Coefficients.Add(new ComplexNumber() { Real = 1 });
+            Polynomial derivatedPolynomial = polynomial.Derive();
 
-            Console.WriteLine(poly);
-            Console.WriteLine(derivatedPoly);
+            Console.WriteLine(polynomial);
+            Console.WriteLine(derivatedPolynomial);
 
-            Color[] colors = new Color[]
-            {
-                Color.Red, Color.Blue, Color.Green, Color.Yellow, Color.Orange, Color.Fuchsia, Color.Gold, Color.Cyan, Color.Magenta
-            };
-
-            // for every pixel in image...
             for (int x = 0; x < bitmapWidth; x++)
             {
                 for (int y = 0; y < bitmapHeight; y++)
                 {
-                    ComplexNumber location = new ComplexNumber().Initialize(xmin,xmin,xstep,ystep,x,y);                    
-                    int iterationPassed = CalculateRootUsingNewtonMethod(poly, derivatedPoly, ref location);
+                    ComplexNumber location = GetLocationComplexNumber(x,y);
+                    int iterationPassed = CalculateRootUsingNewtonMethod(polynomial, derivatedPolynomial, ref location);
                     int rootIndex = FindRootIndex(roots, location);
-                    ColorizePixel(bitmap,colors,x,y,iterationPassed,rootIndex);
+                    ColorizePixel(x, y, iterationPassed, rootIndex);
                 }
             }
-            bitmap.Save(output ?? "../../../out.png");
+            bitmap.Save(output ?? DEFAULT_OUTPUT);
         }
 
-        // find solution of equation using newton's iteration
-        private static int CalculateRootUsingNewtonMethod(Poly poly, Poly derivatedPoly, ref ComplexNumber location)
+        private static void SetVariables(string[] args)
+        {
+            bitmapWidth = int.Parse(args[0]);
+            bitmapHeight = int.Parse(args[1]);
+            xmin = double.Parse(args[2]);
+            xmax = double.Parse(args[3]);
+            ymin = double.Parse(args[4]);
+            ymax = double.Parse(args[5]);
+            output = args[6];
+            xstep = (xmax - xmin) / bitmapWidth;
+            ystep = (ymax - ymin) / bitmapHeight;
+            bitmap = new Bitmap(bitmapWidth, bitmapHeight);
+        }
+
+        private static ComplexNumber GetLocationComplexNumber(int x, int y)
+        {
+            double real = xmin + x * xstep;
+            double imaginary = ymin + y * ystep;
+            if (real == 0)
+                real = DEVIATION;
+            if (imaginary == 0)
+                imaginary = DEVIATION;
+            return new ComplexNumber(real, imaginary);
+        }
+
+        private static int CalculateRootUsingNewtonMethod(Polynomial poly, Polynomial derivatedPoly, ref ComplexNumber location)
         {
             int iterationsPassed = 0;
             for (int i = 0; i < MAX_ITERATIONS; i++)
@@ -74,7 +90,6 @@ namespace INPTPZ1
             return iterationsPassed;
         }
 
-        // find solution root number
         private static int FindRootIndex(List<ComplexNumber> roots, ComplexNumber location)
         {
             bool known = false;
@@ -95,9 +110,13 @@ namespace INPTPZ1
             return index;
         }
 
-        // colorize pixel according to root number
-        private static void ColorizePixel(Bitmap bitmap, Color[] colors, int x, int y, int iteration, int rootIndex)
+        private static void ColorizePixel(int x, int y, int iteration, int rootIndex)
         {
+            Color[] colors = new Color[]
+            {
+                Color.Red, Color.Blue, Color.Green, Color.Yellow, Color.Orange, Color.Fuchsia, Color.Gold, Color.Cyan, Color.Magenta
+            };
+
             Color color = colors[rootIndex % colors.Length];
             color = Color.FromArgb(
                 Math.Min(Math.Max(0, color.R - (int)iteration * 2), 255), 

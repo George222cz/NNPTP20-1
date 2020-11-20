@@ -6,9 +6,8 @@ namespace INPTPZ1
     {
         public class ComplexNumber
         {
-            private const double DEVIATION = 0.0001;
             public double Real { get; set; }
-            public float Imaginary { get; set; }
+            public double Imaginary { get; set; }
 
             public readonly static ComplexNumber Zero = new ComplexNumber()
             {
@@ -16,16 +15,16 @@ namespace INPTPZ1
                 Imaginary = 0
             };
 
-            public ComplexNumber Initialize(double xmin, double ymin, double xstep, double ystep, int x, int y)
+            public ComplexNumber()
             {
-                Real = xmin + x * xstep;
-                Imaginary = (float)(ymin + y * ystep);
+                Real = 0;
+                Imaginary = 0;
+            }
 
-                if (Real == 0)
-                    Real = DEVIATION;
-                if (Imaginary == 0)
-                    Imaginary = (float)DEVIATION;
-                return this;
+            public ComplexNumber(double real, double imaginary)
+            {
+                Real = real;
+                Imaginary = imaginary;
             }
 
             public ComplexNumber Multiply(ComplexNumber number)
@@ -33,7 +32,7 @@ namespace INPTPZ1
                 return new ComplexNumber()
                 {
                     Real = (Real * number.Real) - (Imaginary * number.Imaginary),
-                    Imaginary = (float)((Real * number.Imaginary) + (Imaginary * number.Real))
+                    Imaginary = (Real * number.Imaginary) + (Imaginary * number.Real)
                 };
             }
 
@@ -63,17 +62,18 @@ namespace INPTPZ1
                 return new ComplexNumber()
                 {
                     Real = numerator.Real / divisor,
-                    Imaginary = (float)(numerator.Imaginary / divisor)
+                    Imaginary = numerator.Imaginary / divisor
                 };
             }
 
-            public double GetAbS()
+            public double GetAbs()
             {
                 return Math.Sqrt(Real * Real + Imaginary * Imaginary);
             }
             public double GetAngleInDegrees()
             {
-                return Math.Atan(Imaginary / Real);
+                double radians = (Real < 0 ? Math.PI : (Imaginary < 0 ? (2 * Math.PI) : 0)) + Math.Atan(Imaginary / Real);
+                return (180 / Math.PI) * radians;
             }
 
             public override string ToString()
